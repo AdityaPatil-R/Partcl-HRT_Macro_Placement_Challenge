@@ -1,4 +1,4 @@
-# Docker build context exclusions for eval_docker/
+# Docker build context exclusions
 .git/
 submissions_eval/
 assets/
@@ -7,3 +7,13 @@ eval_docker/results/
 *.gif
 *.png
 os_debug.txt
+
+# Heavy directories that shouldn't go into the image — mounted at runtime.
+external/
+logs/
+.venv/
+.claude/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.log

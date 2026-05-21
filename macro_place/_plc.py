@@ -9,18 +9,18 @@ external/MacroPlacement/CodeElements/Plc_client/. This module adds that path
 """
 
 import sys
+import importlib.util
 from pathlib import Path
 
-_PLC_CLIENT_DIR = str(
-    Path(__file__).resolve().parent.parent
-    / "external"
-    / "MacroPlacement"
-    / "CodeElements"
-    / "Plc_client"
-)
+_PLC_CLIENT_DIR = Path(__file__).resolve().parent.parent / "external" / "MacroPlacement" / "CodeElements" / "Plc_client"
 
-if _PLC_CLIENT_DIR not in sys.path:
-    sys.path.insert(0, _PLC_CLIENT_DIR)
+# Force-load the pure Python version (.py) instead of the Cython .so, which
+# requires the unavailable `circuit_training` package.
+_py_path = _PLC_CLIENT_DIR / "plc_client_os.py"
+_spec = importlib.util.spec_from_file_location("plc_client_os", str(_py_path))
+_mod = importlib.util.module_from_spec(_spec)
+sys.modules.setdefault("plc_client_os", _mod)
+_spec.loader.exec_module(_mod)
 
-from plc_client_os import PlacementCost # noqa  # type: ignore
+from plc_client_os import PlacementCost  # noqa  # type: ignore
 __all__ = ["PlacementCost"]
