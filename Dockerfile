@@ -1,24 +1,22 @@
 # ============================================================
-# Dockerfile — builds DREAMPlace + runs the dreamplace_placer submission.
+# Dockerfile — KeepDreaming submission for the PartCL x HRT Macro Placement
+# Challenge 2026. Builds a self-contained image with DREAMPlace 4.1.0 + Xplace
+# pre-installed, then runs `submissions/portfolio_placer/placer.py` by default.
 #
-# Strategy:
-#   1. Build DREAMPlace from source pinned to a known-good commit (Apr 2024).
-#   2. Install project deps with numpy<2.0 (DREAMPlace incompatible with 2.0).
-#   3. Copy our submission code. At runtime (--network none), all deps are
-#      already present.
+# Submission entry point:  submissions/portfolio_placer/placer.py
+# Method:                  TriSafeLNS Portfolio (avg proxy 1.4506 on IBM)
 #
-# Build:
-#   docker build -t partcl-dreamplace .
+# Build (~30-45 min on first run; subsequent builds use docker layer cache):
+#   docker build -t partcl-keepdreaming .
 #
-# Test locally (won't have CUDA on Mac):
-#   docker run --rm -v $PWD/external:/work/external partcl-dreamplace \
-#     python3 -m macro_place.evaluate submissions/dreamplace_placer/placer.py \
-#     --benchmark ibm04
+# Run on a single benchmark:
+#   docker run --rm --gpus all --network none \
+#     -v $PWD/external:/work/external partcl-keepdreaming \
+#     submissions/portfolio_placer/placer.py --benchmark ibm04
 #
-# Test on GPU machine:
-#   docker run --rm --gpus all -v $PWD/external:/work/external partcl-dreamplace \
-#     python3 -m macro_place.evaluate submissions/dreamplace_placer/placer.py \
-#     --benchmark ibm04
+# Run on all 17 IBM benchmarks (default behavior):
+#   docker run --rm --gpus all --network none \
+#     -v $PWD/external:/work/external partcl-keepdreaming
 # ============================================================
 
 # Build with CUDA 11.8 / pytorch 2.1.2 — narrow sweet spot:
@@ -192,5 +190,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Default command (override with --benchmark)
 ENTRYPOINT ["python3", "-m", "macro_place.evaluate"]
-CMD ["submissions/dreamplace_placer/placer.py", "--benchmark", "ibm04"]
+# Default to the actual submission: TriSafeLNS Portfolio. Run all 17 IBM
+# benchmarks by default. Override with `--benchmark ibmNN` for single runs.
+CMD ["submissions/portfolio_placer/placer.py", "--all"]
 
