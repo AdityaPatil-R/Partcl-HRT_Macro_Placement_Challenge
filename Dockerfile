@@ -189,6 +189,13 @@ RUN python3 -c "import dreamplace.Placer; import dreamplace.Params; print('Place
 ENV PYTHONUNBUFFERED=1
 
 # Default command (override with --benchmark)
+# Time budget per benchmark. The competition cap is 3600s (60 min); we target
+# 3000s (~50 min, 83% of cap) to leave headroom for the LNS phases that have
+# occasionally overrun their internal deadline by 5-10 min on the larger IBM
+# benchmarks (ibm14-18). PORTFOLIO_TOTAL_BUDGET propagates internally to
+# PLACER_TOTAL_BUDGET and FD_TOTAL_BUDGET via setdefault.
+ENV PORTFOLIO_TOTAL_BUDGET=3000
+
 ENTRYPOINT ["python3", "-m", "macro_place.evaluate"]
 # Default to the actual submission: TriSafeLNS Portfolio. Run all 17 IBM
 # benchmarks by default. Override with `--benchmark ibmNN` for single runs.
